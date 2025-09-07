@@ -97,34 +97,50 @@ def update_absensi(nama):
 
     today = datetime.now().strftime("%Y-%m-%d")
     time_now = datetime.now().strftime("%H:%M:%S")
+    hour_now = datetime.now().hour
 
+    # Cek apakah orang sudah punya baris hari ini
     row = df[(df["Nama"] == nama) & (df["Tanggal"] == today)]
     info = name_to_info.get(nama, {"Status": "-", "Fungsi": "-"})
 
-    if row.empty:
-        # Belum ada → Jam Masuk
-        new_row = {
-            "Nama": nama,
-            "Status": info.get("Status", "-"),
-            "Fungsi": info.get("Fungsi", "-"),
-            "Tanggal": today,
-            "Jam Masuk": time_now,
-            "Jam Pulang": ""
-        }
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        print(f"[ABSEN MASUK] {nama} ({info['Status']} / {info['Fungsi']}) masuk pada {time_now}")
-        last_action = f"✅ {nama} Absen Masuk {time_now}"
-    else:
-        # Sudah ada → isi Jam Pulang jika masih kosong
-        idx = row.index[0]
-        if df.at[idx, "Jam Pulang"] == "":
-            df.at[idx, "Jam Pulang"] = time_now
-            print(f"[ABSEN PULANG] {nama} pulang pada {time_now}")
-            last_action = f"✅ {nama} Absen Pulang {time_now}"
+    # Aturan waktu absensi
+    if 6 <= hour_now <= 15:
+        # Hanya absen masuk
+        if row.empty:
+            new_row = {
+                "Nama": nama,
+                "Status": info.get("Status", "-"),
+                "Fungsi": info.get("Fungsi", "-"),
+                "Tanggal": today,
+                "Jam Masuk": time_now,
+                "Jam Pulang": ""
+            }
+            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            print(f"[ABSEN MASUK] {nama} ({info['Status']} / {info['Fungsi']}) masuk pada {time_now}")
+            last_action = f"✅ {nama} Absen Masuk {time_now}"
         else:
-            # Sudah lengkap hari ini → tampilkan info sekali-sekali saja via cooldown global
-            print(f"[INFO] {nama} sudah absen hari ini.")
-            last_action = f"ℹ️ {nama} sudah absen"
+            print(f"[INFO] {nama} sudah absen masuk hari ini.")
+            last_action = f"ℹ️ {nama} sudah absen masuk"
+
+    elif 16 <= hour_now <= 23:
+        # Hanya absen pulang
+        if not row.empty:
+            idx = row.index[0]
+            if df.at[idx, "Jam Pulang"] == "":
+                df.at[idx, "Jam Pulang"] = time_now
+                print(f"[ABSEN PULANG] {nama} pulang pada {time_now}")
+                last_action = f"✅ {nama} Absen Pulang {time_now}"
+            else:
+                print(f"[INFO] {nama} sudah absen pulang hari ini.")
+                last_action = f"ℹ️ {nama} sudah absen pulang"
+        else:
+            print(f"[INFO] {nama} belum absen masuk, jadi tidak bisa absen pulang.")
+            last_action = f"ℹ️ {nama} belum absen masuk"
+
+    else:
+        # Diluar jam absen
+        print(f"[DILUAR WAKTU] {nama} mencoba absen pada {time_now}")
+        last_action = f"⏰ Diluar jam absen"
 
     last_action_time = time()
     save_absensi(df)
