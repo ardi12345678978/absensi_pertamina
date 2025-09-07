@@ -99,7 +99,7 @@ def daftar_wajah(nama, status, fungsi):
 
 if __name__ == "__main__":
     nama = input("Masukkan nama karyawan: ").strip()
-    status = input("Masukkan status (contoh: Karyawan/Magang): ").strip()
+    status = input("Masukkan status (contoh: Karyawan/Magang/kontrak): ").strip()
     fungsi = input("Masukkan fungsi/departemen (contoh: IT/HC/Finance): ").strip()
 
     if not nama or not status or not fungsi:
