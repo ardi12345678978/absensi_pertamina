@@ -1,0 +1,3 @@
+Nama: Farid
+Status: Karyawan
+Fungsi: HC
