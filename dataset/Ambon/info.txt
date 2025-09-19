@@ -1,0 +1,3 @@
+Nama: Ambon
+Status: Karyawan
+Fungsi: HC

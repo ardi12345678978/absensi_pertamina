@@ -1,0 +1,3 @@
+Nama: Ida
+Status: Karyawan
+Fungsi: HC
